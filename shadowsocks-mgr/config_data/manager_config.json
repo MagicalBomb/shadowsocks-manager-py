@@ -1,0 +1,11 @@
+{
+    "server_address": "0.0.0.0",
+    "manager_port":9997,
+    "acc_rec_out_cli_port":9998,
+    "acc_rec_out_ser_port":9999,
+    "base_port": 10000,
+    "timeout": 300,
+    "method": "aes-256-cfb",
+    "db_path": "./config_data/manager.sqlite",
+    "log_file": "./config_data/manager.log"
+}

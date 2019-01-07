@@ -1,0 +1,5 @@
+.vscode
+__pycache__
+.ss_config_file.json
+*.log
+*.sqlite
