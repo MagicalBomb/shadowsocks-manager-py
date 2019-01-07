@@ -2,23 +2,23 @@ from setuptools import setup
 
 setup(
     name="shadowsocks-manager-py",
-    version="Origin",
+    version="3",
     license='MIT License',
     description="Multiple User Manage and access record",
     author='magicalbomb',
     author_email='presentationmeme@qq.com',
     url='https://github.com/MagicalBomb/shadowsocks-manager-py',
-    packages=['shadowsocks-mgr'],
+    packages=['ss_mgr'],
     package_data={
         'shadowsocks': ['README.md', 'LICENSE']
     },
     install_requires=[],
     entry_points="""
     [console_scripts]
-    ssserver-mgr = shadowsocks-mgr.manager:main
+    ss-mgr = ss_mgr.manager:main
     """,
     classifiers=[
-        'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3'
     ],
 )
+
