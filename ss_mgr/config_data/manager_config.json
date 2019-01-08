@@ -6,6 +6,6 @@
     "base_port": 10000,
     "timeout": 300,
     "method": "aes-256-cfb",
-    "db_path": "./config/ss_manager.sqlite",
-    "log_file": "./config/ss_manager.log"
+    "db_path": "./config_data/ss_manager.sqlite",
+    "log_file": "./config_data/ss_manager.log"
 }

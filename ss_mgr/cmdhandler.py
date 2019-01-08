@@ -18,10 +18,9 @@ import mgr_core
 
 # 当前目录
 __CURRENT_DIR__ = os.path.dirname(__file__)
-# 数据及配置目录
+# 配置目录
 __CONFIG_DIR__ = os.path.join(__CURRENT_DIR__,"config_data")
-# 配置数据库及配置文件的位置
-__MANAGER_DB__ = os.path.join(__CONFIG_DIR__,"manager.sqlite")
+# 配置文件的位置
 __MANAGER_CONFIG__ = os.path.join(__CONFIG_DIR__,"manager_config.json")
 # SS Server 配置文件存放位置
 __SS_SER_CONIF_FILE = os.path.join(__CONFIG_DIR__,".ssserver_config.json")
@@ -39,17 +38,16 @@ def init_ss_server_mgr():
     加入默认用户 root， 密码: magicalbomb
 
     '''
+    # 读取配置
+    mgr_config = mgr_core.MgrConfig(__MANAGER_CONFIG__)
+
     if is_init():
-        logging.warning("Already initialize manager, you can reinitialize after delete {}".format(os.path.basename(__MANAGER_DB__)))
+        logging.warning("Already initialize manager, you can reinitialize after delete {}".format(os.path.dirname(mgr_config.db_path)))
         sys.exit(1)
     if not os.path.exists(__MANAGER_CONFIG__):
         logging.error("{} don't exist".format(__MANAGER_CONFIG__))
         sys.exit(1)
 
-    # 读取配置
-    with open(__MANAGER_CONFIG__,"rb") as fp:
-        mgr_config_dict = json.loads(fp.read().decode("utf8"))
-        mgr_config = mgr_core.MgrConfig(mgr_config_dict)
     
     # 初始化数据库
     logging.info("Initializing manager.")
@@ -78,7 +76,7 @@ def init_ss_server_mgr():
         # 加入默认用户失败， 删掉初始化的数据库，回到最初的状态
         logging.error("Adding default user failed.")
         logging.error("error info : {}".format(r.reason))
-        os.remove(__MANAGER_DB__)
+        os.remove(mgr_config.db_path)
         sys.exit(1)
 
     logging.info("Initialize successfully.")
@@ -87,14 +85,9 @@ def reset_ss_server_mgr():
     _check_init()
 
     # 读取配置
-    with open(__MANAGER_CONFIG__,"rb") as fp:
-        mgr_config_dict = json.loads(fp.read().decode("utf8"))
-        mgr_config = mgr_core.MgrConfig(mgr_config_dict)
-    
+    mgr_config = mgr_core.MgrConfig(__MANAGER_CONFIG__)    
     os.remove(mgr_config.db_path)
     logging.info("Reset successfully.")
-
-
 
 def start_ss_server():
     '''
@@ -102,7 +95,7 @@ def start_ss_server():
     '''
     _check_init()
 
-    mgr_config = mgr_core.MgrConfig(mgr_db=__MANAGER_DB__)
+    mgr_config = mgr_core.MgrConfig(__MANAGER_CONFIG__)
     u_mgr = mgr_core.UserManager(mgr_config)
     
     root_user,_ = u_mgr.user_info(__DEFAULT_USER_NAME__)
@@ -130,6 +123,7 @@ def create_user(user_name,password):
 
     def _add_user_to_ssserver(mgr_config,user):
         '''
+        mgr_config  :   mgr_core.MgrConfig
         user    :   mgr_core.User
         '''
         if not is_ss_server_running():
@@ -138,7 +132,7 @@ def create_user(user_name,password):
         mgr_core.add_users_to_ss_server(mgr_config,[user])
 
 
-    mgr_config = mgr_core.MgrConfig(mgr_db=__MANAGER_DB__)
+    mgr_config = mgr_core.MgrConfig(__MANAGER_CONFIG__)
     u_mgr = mgr_core.UserManager(mgr_config)
 
     # 创建 User 对象
@@ -180,7 +174,7 @@ def delete_user(user_name):
 
         mgr_core.delete_users_from_ss_server(mgr_config,[user])
     
-    mgr_config = mgr_core.MgrConfig(mgr_db=__MANAGER_DB__)
+    mgr_config = mgr_core.MgrConfig(__MANAGER_CONFIG__)
     u_mgr = mgr_core.UserManager(mgr_config)
     
     # 获取要删除的用户的信息
@@ -216,7 +210,7 @@ def restore_user(user_name):
 
 
 
-    mgr_config = mgr_core.MgrConfig(mgr_db=__MANAGER_DB__)
+    mgr_config = mgr_core.MgrConfig(__MANAGER_CONFIG__)
     u_mgr = mgr_core.UserManager(mgr_config)
 
     u,r = u_mgr.user_info(user_name)
@@ -238,7 +232,7 @@ def restore_user(user_name):
 def user_info(user_name):
     _check_init()
 
-    mgr_config = mgr_core.MgrConfig(mgr_db=__MANAGER_DB__)
+    mgr_config = mgr_core.MgrConfig(__MANAGER_CONFIG__)
     u_mgr = mgr_core.UserManager(mgr_config)
 
     u,r = u_mgr.user_info(user_name)
@@ -261,7 +255,7 @@ def user_info(user_name):
 def all_users_info():
     _check_init()
 
-    mgr_config = mgr_core.MgrConfig(mgr_db=__MANAGER_DB__)
+    mgr_config = mgr_core.MgrConfig(__MANAGER_CONFIG__)
     u_mgr = mgr_core.UserManager(mgr_config)
 
     _print_info = []
@@ -292,7 +286,7 @@ def refresh():
         logging.info("SS Server is not running.")
         return
 
-    mgr_config = mgr_core.MgrConfig(mgr_db=__MANAGER_DB__)
+    mgr_config = mgr_core.MgrConfig(__MANAGER_CONFIG__)
     u_mgr = mgr_core.UserManager(mgr_config)
 
     user_list = []
@@ -311,12 +305,13 @@ def start_record():
         logging.warning("SS server is not running.")
         sys.exit(1)
         
-    mgr_config = mgr_core.MgrConfig(mgr_db=__MANAGER_DB__)
+    mgr_config = mgr_core.MgrConfig(__MANAGER_CONFIG__)
     for record in mgr_core.start_record(mgr_config):
         print("{user_name}   {url}  {time}".format(user_name=record.user_name,url=record.url,time=record.time))
 
 def is_init():
-    return os.path.exists(__MANAGER_DB__)
+    mgr_config = mgr_core.MgrConfig(__MANAGER_CONFIG__)
+    return os.path.exists(mgr_config.db_path)
 
 def is_ss_server_running():
     return os.path.exists("/var/run/shadowsocks.pid")

@@ -37,18 +37,10 @@ class User:
     def __repr__(self):
         return "< {} >".format(self.user_name)
 
-    def is_public_custom_attr(self,attr):
-        '''
-            这只是一个图方便的函数，用于快速判断
-            一个 attr 是否是 __init__ 中定义的
-            属性
-        '''
-        valid_attr = self.attrs_in_init()
-        return attr in valid_attr
-
     def attrs_in_init(self):
         exclude_list = ["table_name","unique_key","is_public_custom_attr","attrs_in_init"]
         return [attr for attr in dir(self) if not (attr.startswith("_") or  (attr in exclude_list) )]
+
 class MgrConfig:
     '''
     这个类代表整个 SS Server Mgr 的配置
@@ -63,27 +55,18 @@ class MgrConfig:
     "timeout": 300,
     "method": "aes-256-cfb"
 
-    /*Windows*/
-    "db_path": ".\\config_data\\manager.sqlite"
     /*Unix-like*/
     "db_path": "./config/data/manager.sqlite"
-
-    /*Windows*/
-    "log_file": ".\\config_data\\manager.log"
     /*Unix-like*/
     "log_file": "./config_data/manager.log"
-
     '''
     table_name = "manager_config"
 
-    def __init__(self,mgr_config_dict=None,mgr_db=None):
+    def __init__(self,config_file_path=None):
         '''
-        mgr_config_dict :   dict
-        mgr_db  :   str
+        config_file_path    :   str
 
-        mgr_db: 
-            提供一个方便的功能， 只要指定了数据库的位置，就会自动从中获取
-            配置信息对自身进行初始化
+        config file should be json file
         '''
         self.server_address = ""
         self.manager_port = -1
@@ -95,60 +78,23 @@ class MgrConfig:
         self.db_path = ""
         self.log_file = ""
 
-        if mgr_config_dict:
-            self._construct_with_dict(mgr_config_dict)
+        if config_file_path:
+            self._construct_with_json(config_file_path)
+
+    def _construct_with_json(self,json_file_path):
+        d = {}
+        with open(json_file_path,"rb") as fp:
+            d = json.loads(fp.read().decode('utf8'))
         
-        if mgr_db:
-            self._construct_with_db(mgr_db)
+        _attrs = self.attrs_in_init()
+        for _a in _attrs:
+            self.__setattr__(_a,d[_a])
 
-    def _construct_with_dict(self,mgr_config_dict):
-        _attrs_list = self.attrs_in_init()
-        for _a in _attrs_list:
-            self.__setattr__(_a,mgr_config_dict[_a])
-
-    def _construct_with_db(self,mgr_db):
-
-        def _generate_select_sql_cmd_with_MgrConfig():
-            _sql_cmd = \
-            '''
-            SELECT 
-                {attrs_list}
-            FROM
-                {table_name}
-            '''
-            _attrs_list = ""
-            for _a in self.attrs_in_init():
-                _attrs_list += "{},".format(_a)
-            _attrs_list = _attrs_list[:-1]
-
-            return _sql_cmd.format(
-                        attrs_list = _attrs_list,
-                        table_name = MgrConfig.table_name,
-                    )
-        
-        _db_connection = sqlite3.connect(mgr_db)
-        r = _db_connection.execute(_generate_select_sql_cmd_with_MgrConfig())
-
-        _values_list = r.fetchone()
-        if _values_list:
-            _attrs_list = self.attrs_in_init()
-            for _a,_v in zip(_attrs_list,_values_list):
-                self.__setattr__(_a,_v)
-        else:
-            raise Exception("Table '{}' dont exist in database".format(MgrConfig.table_name))
-
-    def is_public_custom_attr(self,attr):
-        '''
-            这只是一个图方便的函数，用于快速判断
-            一个 attr 是否是 __init__ 中定义的
-            属性
-        '''
-        valid_attr = self.attrs_in_init()
-        return attr in valid_attr
 
     def attrs_in_init(self):
-        exclude_list = ["table_name","is_public_custom_attr","attrs_in_init"]
+        exclude_list = ["table_name","attrs_in_init"]
         return [attr for attr in dir(self) if not (attr.startswith("_") or  (attr in exclude_list) )]
+
 class Record:
     '''
     这个类是保存访问记录表的模型
@@ -166,17 +112,19 @@ class Record:
     def attrs_in_init(self):
         exclude_list = ["table_name","primary_key","attrs_in_init"]
         return [attr for attr in dir(self) if not (attr.startswith("_") or  (attr in exclude_list) )]
+
 class SSServerLaunchResult:
     def __init__(self):
         self.already_running = False
         self.success = False
         self.dont_exist = False
+
 def init_ss_manager(mgr_config):
     '''
     初始化数据库
 
     这个函数，会在指定的 sqlite 数据库中根据 User 和 MgrConfig 创建两个表：
-    1. 用户信息表 2. 管理器配置表
+    1. 用户信息表 2. 访问记录表
 
     mgr_conifg  :   MgrConfig
 
@@ -282,7 +230,7 @@ def init_ss_manager(mgr_config):
     
 
     # 创建数据库
-    db_connection = sqlite3.connect(mgr_config.db_path)
+    db_connection = sqlite3.connect("file:"+mgr_config.db_path,uri=True)
     
     # 创建用户表
     _sql_cmd = _generate_sql_cmd_with_User(db_connection)
@@ -293,12 +241,12 @@ def init_ss_manager(mgr_config):
     db_connection.execute(_sql_cmd)
 
     # 创建配置表（只有一行）
-    _sql_cmd = _generate_sql_cmd_with_MgrConfig(db_connection)
-    db_connection.execute(_sql_cmd)
+    # _sql_cmd = _generate_sql_cmd_with_MgrConfig(db_connection)
+    # db_connection.execute(_sql_cmd)
 
     # 配置文件写入数据库
-    _sql_cmd = _generate_insert_sql_cmd_with_MgrConfig(db_connection,mgr_config)
-    db_connection.execute(_sql_cmd)
+    # _sql_cmd = _generate_insert_sql_cmd_with_MgrConfig(db_connection,mgr_config)
+    # db_connection.execute(_sql_cmd)
 
     db_connection.commit()
     db_connection.close()
@@ -372,7 +320,7 @@ def start_record(mgr_config):
     '''
     mgr_config  :   MgrConfig
     '''
-    db_connection = sqlite3.connect(mgr_config.db_path)
+    db_connection = sqlite3.connect("file:"+mgr_config.db_path,uri=True)
     u_mgr = UserManager(mgr_config)
     rec_socket  = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
     rec_socket.bind(('localhost',mgr_config.acc_rec_out_cli_port))
@@ -432,12 +380,6 @@ def start_record(mgr_config):
         rec = _listen_rec_info_from_ss_server()
         record = _insert_to_mgr_db(rec)
         yield record
-
-def start_ss_server_recoder(mgr_config):
-    '''
-    开启对服务器访问记录的监控
-    '''
-    pass
 
 def add_users_to_ss_server(mgr_config,user_list):
     '''
@@ -579,7 +521,6 @@ def _test_ss_server(mgr_config):
     )
     return cli.recv(100)
 
-
 class UserOperationResult:
 
     def __init__(self,success=False,reason=""):
@@ -600,7 +541,7 @@ class UserManager:
     def __init__(self,mgr_config):
         # self._users_info_list = []
         self._mgr_config = mgr_config
-        self._db_connection = sqlite3.connect(self._mgr_config.db_path)
+        self._db_connection = sqlite3.connect("file:"+self._mgr_config.db_path,uri=True)
 
     def create_user(self,user):
         '''
@@ -842,12 +783,11 @@ class UserManager:
         else:
             return 0
 
-
 if __name__ == "__main__":
     
-    with open("./config_data/manager_config.json","rb") as fp:
-        mgr_config_dict = json.loads(fp.read().decode("utf8"))
-        mgr_config = MgrConfig(mgr_config_dict)
+    # with open("./config_data/manager_config.json","rb") as fp:
+    #     mgr_config_dict = json.loads(fp.read().decode("utf8"))
+    #     mgr_config = MgrConfig(mgr_config_dict)
 
     # u_mgr = UserManager(mgr_config)
 

@@ -33,10 +33,6 @@ import os
 
 # 本包目录
 __PACKAGE_DIR_NAME__ = os.path.dirname(os.path.realpath(__file__))
-# 配置文件的位置
-__GLOBAL_CONIF_FILE__ = os.path.join(__PACKAGE_DIR_NAME__,"config_data","manager_config.json")
-
-
 
 
 def main():
