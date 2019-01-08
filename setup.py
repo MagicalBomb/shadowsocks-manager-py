@@ -9,9 +9,6 @@ setup(
     author_email='presentationmeme@qq.com',
     url='https://github.com/MagicalBomb/shadowsocks-manager-py',
     packages=['ss_mgr'],
-    package_data={
-        'shadowsocks': ['README.md', 'LICENSE']
-    },
     install_requires=[],
     entry_points="""
     [console_scripts]
