@@ -32,7 +32,7 @@ __DEFAULT_USER_NAME__ = "root"
 __DEFAULT_USER_PWD__ = "magicalbomb"
 
 
-def init_ss_server():
+def init_ss_server_mgr():
     '''
     初始化 ss server 数据库
     +

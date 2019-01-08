@@ -105,7 +105,12 @@ class MgrConfig:
     def _construct_with_dict(self,mgr_config_dict):
         _attrs_list = self.attrs_in_init()
         for _a in _attrs_list:
-            self.__setattr__(_a,mgr_config_dict[_a])
+            if _a == "db_path":
+                self.db_path = os.path.realpath(mgr_config_dict[_a])
+            elif _a == "log_file":
+                self.log_file = os.path.realpath(mgr_config_dict[_a])
+            else:
+                self.__setattr__(_a,mgr_config_dict[_a])
 
     def _construct_with_db(self,mgr_db):
 
@@ -134,7 +139,12 @@ class MgrConfig:
         if _values_list:
             _attrs_list = self.attrs_in_init()
             for _a,_v in zip(_attrs_list,_values_list):
-                self.__setattr__(_a,_v)
+                if _a == "db_path":
+                    self.db_path = os.path.realpath(_v)
+                elif _a == "log_file":
+                    self.log_file = os.path.realpath(_v)
+                else:
+                    self.__setattr__(_a,_v)
         else:
             raise Exception("Table '{}' dont exist in database".format(MgrConfig.table_name))
 

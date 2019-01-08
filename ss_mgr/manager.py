@@ -65,7 +65,7 @@ def _run(args):
     if subcommand_name == None:
         return
     elif subcommand_name == "init":
-        cmdhandler.init_ss_server()
+        cmdhandler.init_ss_server_mgr()
     elif subcommand_name == 'server':
         _ser_cmd_handler(args)     
     elif subcommand_name == 'user':
