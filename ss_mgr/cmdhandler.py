@@ -56,8 +56,9 @@ def init_ss_server_mgr():
     try:
         mgr_core.init_ss_manager(mgr_config)
     except sqlite3.OperationalError as e:
+        logging.error("The reason of error maybe permission deny or db_path is mistake.")
         logging.error("manager_config.db_path = {}".format(mgr_config.db_path))
-    
+        raise e
 
 
     # 加入默认用户
@@ -82,6 +83,19 @@ def init_ss_server_mgr():
 
     logging.info("Initialize successfully.")
     
+def reset_ss_server_mgr():
+    _check_init()
+
+    # 读取配置
+    with open(__MANAGER_CONFIG__,"rb") as fp:
+        mgr_config_dict = json.loads(fp.read().decode("utf8"))
+        mgr_config = mgr_core.MgrConfig(mgr_config_dict)
+    
+    os.remove(mgr_config.db_path)
+    logging.info("Reset successfully.")
+
+
+
 def start_ss_server():
     '''
     mgr_config_file_path    :   str

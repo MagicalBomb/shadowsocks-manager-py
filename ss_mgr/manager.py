@@ -66,6 +66,8 @@ def _run(args):
         return
     elif subcommand_name == "init":
         cmdhandler.init_ss_server_mgr()
+    elif subcommand_name == "reset":
+        cmdhandler.reset_ss_server_mgr()
     elif subcommand_name == 'server':
         _ser_cmd_handler(args)     
     elif subcommand_name == 'user':
@@ -118,6 +120,10 @@ def _parse_command_line() -> argparse.Namespace:
     ss_mgr_parser = sub_parsers.add_parser(
         'init',
         help='Init this SS Server manager with default_config.json'
+    )
+    ss_mgr_parser = sub_parsers.add_parser(
+        'reset',
+        help='Reset this SS Server manager, then you can init manager again.'
     )
     ################################################################################
 
