@@ -16,21 +16,27 @@
 #   base_port:  SS 服务器多用户下，端口号从 base_port 开始自增， base_port 分配给默认的 root 用户 
 
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__),".."))
+
 import argparse
 import threading
 import json
 import logging
-import sys
-import os
 import sqlite3
 from pprint import pprint as pp
 import cmdhandler
 import os
 
+
+
 # 本包目录
 __PACKAGE_DIR_NAME__ = os.path.dirname(os.path.realpath(__file__))
 # 配置文件的位置
 __GLOBAL_CONIF_FILE__ = os.path.join(__PACKAGE_DIR_NAME__,"config_data","manager_config.json")
+
+
 
 
 def main():
