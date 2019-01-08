@@ -81,7 +81,6 @@ class MgrConfig:
         mgr_config_dict :   dict
         mgr_db  :   str
 
-
         mgr_db: 
             提供一个方便的功能， 只要指定了数据库的位置，就会自动从中获取
             配置信息对自身进行初始化
@@ -105,12 +104,7 @@ class MgrConfig:
     def _construct_with_dict(self,mgr_config_dict):
         _attrs_list = self.attrs_in_init()
         for _a in _attrs_list:
-            if _a == "db_path":
-                self.db_path = os.path.realpath(mgr_config_dict[_a])
-            elif _a == "log_file":
-                self.log_file = os.path.realpath(mgr_config_dict[_a])
-            else:
-                self.__setattr__(_a,mgr_config_dict[_a])
+            self.__setattr__(_a,mgr_config_dict[_a])
 
     def _construct_with_db(self,mgr_db):
 
@@ -139,12 +133,7 @@ class MgrConfig:
         if _values_list:
             _attrs_list = self.attrs_in_init()
             for _a,_v in zip(_attrs_list,_values_list):
-                if _a == "db_path":
-                    self.db_path = os.path.realpath(_v)
-                elif _a == "log_file":
-                    self.log_file = os.path.realpath(_v)
-                else:
-                    self.__setattr__(_a,_v)
+                self.__setattr__(_a,_v)
         else:
             raise Exception("Table '{}' dont exist in database".format(MgrConfig.table_name))
 
@@ -177,8 +166,6 @@ class Record:
     def attrs_in_init(self):
         exclude_list = ["table_name","primary_key","attrs_in_init"]
         return [attr for attr in dir(self) if not (attr.startswith("_") or  (attr in exclude_list) )]
-
-
 class SSServerLaunchResult:
     def __init__(self):
         self.already_running = False
@@ -295,10 +282,7 @@ def init_ss_manager(mgr_config):
     
 
     # 创建数据库
-    db_connection = sqlite3.connect(
-        "file:"+mgr_config.db_path,
-        uri=True
-        )
+    db_connection = sqlite3.connect(mgr_config.db_path)
     
     # 创建用户表
     _sql_cmd = _generate_sql_cmd_with_User(db_connection)
