@@ -53,7 +53,11 @@ def init_ss_server_mgr():
     
     # 初始化数据库
     logging.info("Initializing manager.")
-    mgr_core.init_ss_manager(mgr_config)
+    try:
+        mgr_core.init_ss_manager(mgr_config)
+    except sqlite3.OperationalError as e:
+        logging.error("manager_config.db_path = {}".format(mgr_config.db_path))
+    
 
 
     # 加入默认用户
