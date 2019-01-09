@@ -129,7 +129,8 @@ def create_user(user_name,password):
         if not is_ss_server_running():
             return
 
-        mgr_core.add_users_to_ss_server(mgr_config,[user])
+        for _ in mgr_core.add_users_to_ss_server(mgr_config,[user]):
+            pass
 
 
     mgr_config = mgr_core.MgrConfig(__MANAGER_CONFIG__)
@@ -177,7 +178,8 @@ def delete_user(user_name):
         if not is_ss_server_running():
             return
 
-        mgr_core.delete_users_from_ss_server(mgr_config,[user])
+        for _ in mgr_core.delete_users_from_ss_server(mgr_config,[user]):
+            pass
     
     mgr_config = mgr_core.MgrConfig(__MANAGER_CONFIG__)
     u_mgr = mgr_core.UserManager(mgr_config)
@@ -216,7 +218,8 @@ def restore_user(user_name):
         if not is_ss_server_running():
             return
 
-        mgr_core.add_users_to_ss_server(mgr_config,[user])
+        for _ in mgr_core.add_users_to_ss_server(mgr_config,[user]):
+            pass
 
 
 
@@ -311,7 +314,7 @@ def refresh():
             user_list.append(user)
 
     for user_name in mgr_core.add_users_to_ss_server(mgr_config,user_list):
-        logging.info("Add user : {}").format(user_name)
+        logging.info("Add user : {}".format(user_name))
 
 def start_record():
     _check_init()

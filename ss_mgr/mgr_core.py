@@ -399,6 +399,7 @@ def add_users_to_ss_server(mgr_config,user_list):
         else:
             break
     cli.connect(('localhost',mgr_config.manager_port))
+    cli.settimeout(5)
 
     for _user in user_list:
         cli.send(
@@ -429,6 +430,7 @@ def delete_users_from_ss_server(mgr_config,user_list):
         else:
             break
     cli.connect(('localhost',mgr_config.manager_port))
+    cli.settimeout(5)
 
     for _user in user_list:
         cli.send(
