@@ -201,7 +201,7 @@ def delete_user(user_name):
             sys.exit(0)
 
         try:
-            delete_user_from_ss_server(mgr_config,u)
+            _delete_user_from_ss_server(mgr_config,u)
         except Exception as e:
             logging.error("Can't add user to ss server.")
             raise e
