@@ -149,6 +149,11 @@ def create_user(user_name,password):
 
     if r.success:
         logging.info("Create user : {} in databse successfully".format(user_name))
+
+        # 若服务器未启动，到这里就可以结束了
+        if not is_ss_server_running():
+            sys.exit(0)
+
         try:
             _add_user_to_ssserver(mgr_config,user)
         except Exception as e:
@@ -188,6 +193,11 @@ def delete_user(user_name):
     else:
         u_mgr.delete_user(u)
         logging.info("Delete user {} from database successfully".format(user_name))
+
+        # 若服务器未启动，到这里就可以结束了
+        if not is_ss_server_running():
+            sys.exit(0)
+
         try:
             delete_user_from_ss_server(mgr_config,u)
         except Exception as e:
@@ -221,6 +231,11 @@ def restore_user(user_name):
     else:
         u_mgr.restore_user(u)
         logging.info("Restore user {} in database successfully".format(user_name))
+
+        # 若服务器未启动，到这里就可以结束了
+        if not is_ss_server_running():
+            sys.exit(0)
+
         try:
             _add_user_to_ssserver(mgr_config,user)
         except Exception as e:

@@ -409,6 +409,7 @@ def add_users_to_ss_server(mgr_config,user_list):
                 encoding='ascii'
             )
         )
+        cli.recv(100)
         yield _user.user_name
 
 def delete_users_from_ss_server(mgr_config,user_list):
@@ -438,6 +439,7 @@ def delete_users_from_ss_server(mgr_config,user_list):
                 encoding='ascii'
             )
         )
+        cli.recv(100)
         yield _user.user_name
 
 def _call_manager_api(cmd,args,mgr_config):
